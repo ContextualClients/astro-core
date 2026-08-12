@@ -1,0 +1,15 @@
+---
+import Layout from "@/scaffold/Layout.astro"
+import { config } from "@/config"
+const authConfig = Astro.locals.authConfig
+const errorState = Astro.locals.siteUser === null // Explicit null indicates backend error
+---
+<Layout>
+  <h1>Sign in</h1>
+  <cds-sign-in
+    public-token={authConfig?.publicToken}
+    organization-slug={authConfig?.organizationSlug}
+    session-minutes={config.sessions.sessionMinutes}
+    error-state={errorState || undefined}
+  ></cds-sign-in>
+</Layout>

@@ -1,0 +1,6 @@
+---
+/* Retrieves and sets the site's theme from localStorage. Must block to avoid flash of incorrect color scheme. */
+---
+<script is:inline>
+document.documentElement.setAttribute("theme",localStorage.getItem("theme")||"system")
+</script>

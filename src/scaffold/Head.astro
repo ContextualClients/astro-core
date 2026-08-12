@@ -1,0 +1,23 @@
+---
+import PostloadScripts from "./scripts/postload/index.astro"
+import PreloadScripts from "./scripts/preload/index.astro"
+
+/* Import Contextual Design System stylesheets */
+import "@contextual-io/cds-core/styles/cds.css"
+
+/* Import local stylesheets */
+import "@/styles/reset.css"
+import "@/styles/util.css"
+import "@/styles/style.css"
+import "@/styles/theme.css"
+---
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Astro Core</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <PreloadScripts />
+  <PostloadScripts />
+</head>

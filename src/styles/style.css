@@ -1,0 +1,16 @@
+body {
+  margin: 25px;
+}
+
+h1 svg {
+  margin-inline-end: 1ch;
+}
+
+img, svg {
+  vertical-align: middle;
+}
+
+hr {
+  border-top: 1px solid;
+  margin-block: 1rem;
+}

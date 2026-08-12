@@ -1,0 +1,50 @@
+name: Publish
+on:
+  push:
+    branches:
+      - "main"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # This action should only run on template clones
+    if: ${{ !github.event.repository.is_template }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          cache: 'yarn'
+          node-version-file: .nvmrc
+      - run: yarn
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: yarn release
+      - name: Get package version
+        if: steps.changesets.outputs.published == 'true'
+        id: package-version
+        run: |
+          package_version=$(node -p "require('./package.json').version")
+          echo "PACKAGE_VERSION=${package_version}" >> "$GITHUB_OUTPUT"
+      - name: Create built artifact
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          PACKAGE_VERSION: ${{ steps.package-version.outputs.PACKAGE_VERSION }}
+        run: |
+          echo "version: $PACKAGE_VERSION"
+          tar cvfz build-${PACKAGE_VERSION}.tar.gz ./dist ./package.json ./yarn.lock
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        if: steps.changesets.outputs.published == 'true'
+        with:
+          files: build-${{ steps.package-version.outputs.PACKAGE_VERSION }}.tar.gz
+          tag_name: v${{ steps.package-version.outputs.PACKAGE_VERSION }}

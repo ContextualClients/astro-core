@@ -1,0 +1,16 @@
+---
+import Layout from "@/scaffold/Layout.astro"
+import { config } from "@/config"
+const authConfig = Astro.locals.authConfig
+const siteUser = Astro.locals.siteUser
+---
+<Layout>
+  <h1>Home</h1>
+  <cds-user
+    site-user={siteUser ? JSON.stringify(siteUser) : undefined}
+    public-token={authConfig?.publicToken}
+    organization-slug={authConfig?.organizationSlug}
+    session-minutes={config.sessions.sessionMinutes}
+    keep-alive={config.sessions.extendWithUse}
+  ></cds-user>
+</Layout>

@@ -1,0 +1,10 @@
+---
+import Layout from "@/scaffold/Layout.astro"
+const authConfig = Astro.locals.authConfig
+---
+<Layout>
+  <cds-sign-out
+    public-token={authConfig?.publicToken}
+    organization-slug={authConfig?.organizationSlug}
+  ></cds-sign-out>
+</Layout>

@@ -1,0 +1,8 @@
+# Matches in this file will not be included in the template-sync GitHub action PRs
+
+# Per-site environment / local config
+site-auth.local.json
+config.json
+
+# Per-site identity / docs
+README.md

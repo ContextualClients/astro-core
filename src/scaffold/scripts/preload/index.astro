@@ -1,0 +1,8 @@
+---
+/* Preload scripts imported in <head> and executed immediately.
+ * Use with extreme caution: HTML rendering will be blocked until these scripts have completed.
+ * Scripts here must be inline, avoid async, and be written as concisely as possible.
+ */
+import ThemeScript from "./Theme.astro"
+---
+<ThemeScript />

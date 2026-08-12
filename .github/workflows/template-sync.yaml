@@ -1,0 +1,39 @@
+name: template-sync
+
+# Keeps cloned Contextual Site repos in sync with the upstream astro-core template.
+on:
+  schedule:
+    - cron: "0 14 * * *" # Daily @ 14:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  template-sync:
+    runs-on: ubuntu-latest
+    # This action should only run on template clones
+    if: ${{ !github.event.repository.is_template }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          # Prevent source_gh_token below from being overridden
+          persist-credentials: false
+
+      - name: Sync from astro-core template
+        uses: AndreasAugustin/actions-template-sync@v2
+        with:
+          source_repo_path: ${{ github.repository_owner }}/astro-core
+          upstream_branch: main
+          source_gh_token: ${{ secrets.TEMPLATE_SYNC_TOKEN }}
+          target_gh_token: ${{ secrets.TEMPLATE_SYNC_TOKEN }}
+          # User the sync PRs will come from
+          git_user_name: ajguyot
+          git_user_email: alex@unapologetic.io
+          pr_body: |
+            Syncs `${SOURCE_REPO}` @ `${TEMPLATE_GIT_HASH}`.
+
+            ⚠️ **Read `TEMPLATE_CHANGELOG.md` in this diff before merging.**

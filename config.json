@@ -1,0 +1,8 @@
+{
+  "publicPaths": [],
+  "sessions": {
+    "type": "static",
+    "duration": 30,
+    "unit": "days"
+  }
+}
