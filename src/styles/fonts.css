@@ -1,0 +1,67 @@
+body {
+  font-family: var(--cds-font-family-body);
+  font-weight: var(--cds-font-weight-body);
+  font-size: var(--cds-font-size-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--cds-font-family-heading);
+  font-weight: var(--cds-font-weight-heading);
+}
+h1 { font-size: var(--cds-font-size-heading-one); }
+h2 { font-size: var(--cds-font-size-heading-two); }
+h3 { font-size: var(--cds-font-size-heading-three); }
+h4 { font-size: var(--cds-font-size-heading-four); }
+h5 { font-size: var(--cds-font-size-heading-five); }
+h6 { font-size: var(--cds-font-size-heading-six); }
+
+@font-face {
+  font-family: Inter;
+  src: url('/assets/fonts/Inter.woff2') format('woff2-variations'); /* Safari pre-2023 fallback */
+  src: url('/assets/fonts/Inter.woff2') format('woff2') tech(variations);
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Inter;
+  src: url('/assets/fonts/InterItalic.woff2') format('woff2-variations'); /* Safari pre-2023 fallback */
+  src: url('/assets/fonts/InterItalic.woff2') format('woff2') tech(variations);
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Fraunces;
+  src: url('/assets/fonts/Fraunces.woff2') format('woff2-variations'); /* Safari pre-2023 fallback */
+  src: url('/assets/fonts/Fraunces.woff2') format('woff2') tech(variations);
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Fraunces;
+  src: url('/assets/fonts/FrauncesItalic.woff2') format('woff2-variations'); /* Safari pre-2023 fallback */
+  src: url('/assets/fonts/FrauncesItalic.woff2') format('woff2') tech(variations);
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: IBM Plex Mono;
+  src: url('/assets/fonts/IBMPlexMono.woff2') format('woff2-variations'); /* Safari pre-2023 fallback */
+  src: url('/assets/fonts/IBMPlexMono.woff2') format('woff2') tech(variations);
+  font-weight: 100 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: IBM Plex Mono;
+  src: url('/assets/fonts/IBMPlexMonoItalic.woff2') format('woff2-variations'); /* Safari pre-2023 fallback */
+  src: url('/assets/fonts/IBMPlexMonoItalic.woff2') format('woff2') tech(variations);
+  font-weight: 100 700;
+  font-style: italic;
+  font-display: swap;
+}
