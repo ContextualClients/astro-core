@@ -10,6 +10,7 @@ const errorState = Astro.locals.siteUser === null // Explicit null indicates bac
     public-token={authConfig?.publicToken}
     organization-slug={authConfig?.organizationSlug}
     session-minutes={config.sessions.sessionMinutes}
+    auth-methods={config.stytchConfig.authMethods.join(",")}
     error-state={errorState || undefined}
   ></cds-sign-in>
 </Layout>
