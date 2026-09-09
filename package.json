@@ -22,7 +22,7 @@
   "devDependencies": {
     "@astrojs/check": "0.9.9",
     "@changesets/cli": "^2.31.0",
-    "@contextual-io/cds-core": "^0.1.0",
+    "@contextual-io/cds-core": "0.1.3",
     "@stytch/vanilla-js": "^6.0.11",
     "@types/node": "24.13.2",
     "@types/picomatch": "4.0.3",

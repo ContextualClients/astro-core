@@ -2,3 +2,4 @@ node_modules/
 dist/
 .astro/
 site-auth.local.json
+.DS_Store

@@ -44,7 +44,10 @@ export const onRequest = defineMiddleware(async (context, next) => {
     // native-object-api request fails. This is an error state.
     const errorState = context.locals.siteUser === null
     // The <cds-sign-in> component at /sign-in will identify and communicate regarding this error.
-    if (errorState) return context.redirect("/sign-in")
+    if (errorState) {
+      await context.locals.logger?.error("Site user could not be resolved for an authenticated visitor requesting %s.", path)
+      return context.redirect("/sign-in")
+    }
     return context.redirect(`/sign-in?redirect=${encodeURIComponent(path + context.url.search)}`)
   }
 

@@ -31,8 +31,10 @@ jobs:
           source_gh_token: ${{ secrets.TEMPLATE_SYNC_TOKEN }}
           target_gh_token: ${{ secrets.TEMPLATE_SYNC_TOKEN }}
           # User the sync PRs will come from
-          git_user_name: ajguyot
-          git_user_email: alex@unapologetic.io
+          git_user_name: ContextualDevOps
+          git_user_email: devops@contextual.io
+          pr_title: "chore(template): sync astro-core @ ${TEMPLATE_GIT_HASH}"
+          pr_commit_msg: "chore(template): sync astro-core template"
           pr_body: |
             Syncs `${SOURCE_REPO}` @ `${TEMPLATE_GIT_HASH}`.
 
