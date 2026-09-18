@@ -1,12 +1,18 @@
 ---
+import ThemeToggle from "./ThemeToggle.astro"
 import Head from "./Head.astro"
 ---
 <!DOCTYPE html>
 <html lang="en">
   <Head />
   <body>
+    <header class="site-toolbar"><ThemeToggle /></header>
     <main>
       <slot />
     </main>
   </body>
 </html>
+
+<style>
+  .site-toolbar { display: flex; justify-content: flex-end; margin-bottom: 1rem; }
+</style>

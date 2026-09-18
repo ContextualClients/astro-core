@@ -1,6 +1,34 @@
----
-/* Retrieves and sets the site's theme from localStorage. Must block to avoid flash of incorrect color scheme. */
----
 <script is:inline>
-document.documentElement.setAttribute("theme",localStorage.getItem("theme")||"system")
+  (() => {
+    let preference
+    try { preference = localStorage.getItem("theme") } catch {}
+    document.documentElement.setAttribute("theme", preference === "light" || preference === "dark"
+      ? preference : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+  })()
+</script>
+<script>
+  const systemTheme = matchMedia("(prefers-color-scheme: dark)")
+  const readPreference = () => {
+    try { return localStorage.getItem("theme") } catch { return undefined }
+  }
+  let preference = readPreference()
+  const applyTheme = (root = document.documentElement) => {
+    root.setAttribute("theme", preference === "light" || preference === "dark"
+      ? preference : systemTheme.matches ? "dark" : "light")
+    root.dataset.themePreference = preference === "light" || preference === "dark" ? preference : "system"
+  }
+  applyTheme()
+  systemTheme.addEventListener("change", () => applyTheme())
+  document.addEventListener("astro:before-swap", event => applyTheme(event.newDocument.documentElement))
+  window.addEventListener("storage", event => {
+    if (event.key !== "theme" && event.key != null) return
+    preference = readPreference()
+    applyTheme()
+  })
+  document.addEventListener("theme-change", event => {
+    if (!(event instanceof CustomEvent) || !["light", "dark", "system"].includes(event.detail)) return
+    preference = event.detail
+    applyTheme()
+    try { localStorage.setItem("theme", preference ?? "system") } catch {}
+  })
 </script>

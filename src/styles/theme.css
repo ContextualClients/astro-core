@@ -1,14 +1,33 @@
 :root {
-  --color-bg: light-dark(#fff, #000);
-  --color-text: light-dark(#000, #fff);
+  color-scheme: light;
+  --site-color-scheme: light;
+  --site-dark-mode: 0;
+  --color-bg: var(--cds-color-bg);
+  --color-text: var(--cds-color-text);
+  --site-action-bg: var(--cds-color-brand-dark);
+  --site-action-text: var(--cds-color-brand-light);
 }
 
 body {
-  color: var(--color-text);
-  background-color: var(--color-bg);
+  color: var(--cds-color-text);
+  background-color: var(--cds-color-bg);
 }
 
 /* Default unfilled SVG paths to site text color. */
 :where(path:not([fill])) {
-  fill: var(--color-text);
+  fill: var(--cds-color-text);
+}
+
+:root[theme="dark"] {
+  color-scheme: dark;
+  --site-color-scheme: dark;
+  --site-dark-mode: 1;
+  --cds-color-bg: #1c2026;
+  --cds-color-bg-shade: #343b45;
+  --cds-color-bg-contrast: #798594;
+  --cds-color-text: #e7e9ed;
+  --cds-color-text-gray: #adb6c3;
+  --cds-color-brand-primary: #9ebee0;
+  --site-action-bg: #ccd9e8;
+  --site-action-text: #1c2633;
 }

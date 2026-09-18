@@ -3,3 +3,5 @@ dist/
 .astro/
 site-auth.local.json
 .DS_Store
+test-results/
+playwright-report/
