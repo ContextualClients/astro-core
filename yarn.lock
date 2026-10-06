@@ -100,6 +100,20 @@
     smol-toml "^1.6.0"
     unified "^11.0.5"
 
+"@astrojs/internal-helpers@0.10.3":
+  version "0.10.3"
+  resolved "https://registry.yarnpkg.com/@astrojs/internal-helpers/-/internal-helpers-0.10.3.tgz#0f8b7401f37115365165396fc75c649dd6607f20"
+  integrity sha512-HIx/t1NywcqSTFaVwZh15n8JsC3YQdCaJZDaTS/aurYTEvNiWDXUGS3Z9uQX3bFB+B1pCgN/nljckkzYTpHZ2w==
+  dependencies:
+    "@types/hast" "^3.0.4"
+    "@types/mdast" "^4.0.4"
+    js-yaml "^4.3.0"
+    picomatch "^4.0.4"
+    retext-smartypants "^6.2.0"
+    shiki "^4.0.2"
+    smol-toml "^1.6.0"
+    unified "^11.0.5"
+
 "@astrojs/language-server@^2.16.7":
   version "2.16.16"
   resolved "https://registry.yarnpkg.com/@astrojs/language-server/-/language-server-2.16.16.tgz#e432093fa8dd4ab408ab040a7e58e0779306fbcb"
@@ -134,12 +148,12 @@
     github-slugger "^2.0.0"
     satteri "^0.9.1"
 
-"@astrojs/node@11.0.0":
-  version "11.0.0"
-  resolved "https://registry.yarnpkg.com/@astrojs/node/-/node-11.0.0.tgz#da52731d97e9b5990b69563d41796233c5ae6467"
-  integrity sha512-lmwSTG42fAs9/UxNAHt4noseEwXcDupwqMWVftw0j24BaHU9F1CEfi63p3pPlwGP9g0wLqitGQJP/P6x1vLdOQ==
+"@astrojs/node@11.1.3":
+  version "11.1.3"
+  resolved "https://registry.yarnpkg.com/@astrojs/node/-/node-11.1.3.tgz#8ba3649852a713c4eb096de4c19cb492993e7965"
+  integrity sha512-z60jMFOPEk3+VmxfxENjC8ofFDq2YIUTBFwz+bf+qqv5aIJG2woVGH8b+cbhydZA62PoVz0RC8ORZl6TJUDi7g==
   dependencies:
-    "@astrojs/internal-helpers" "0.10.0"
+    "@astrojs/internal-helpers" "0.10.3"
     send "^1.2.1"
     server-destroy "^1.0.1"
 
@@ -2105,7 +2119,7 @@ js-yaml@^3.6.1:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
-js-yaml@^4.1.1:
+js-yaml@^4.1.1, js-yaml@^4.3.0:
   version "4.3.2"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-4.3.2.tgz#8e44fb14a2643c59726bb15787b5f1512cb3d3fb"
   integrity sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==
