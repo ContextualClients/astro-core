@@ -12,7 +12,7 @@ The Astro baseline used to generate Contextual Sites.
 document.dispatchEvent(new CustomEvent("theme-change", { detail: "dark" })) // light, dark, or system
 ```
 
-`--color-bg` and `--color-text` in `src/styles/theme.css` set the page colors for both themes.
+`src/styles/theme.css` points `--color-bg` and `--color-text` at the CDS semantic colors and overrides those CDS colors for dark mode. Use the CDS color variables in components so they change with the theme.
 
 ## Sign-in
 

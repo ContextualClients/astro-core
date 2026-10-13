@@ -2,6 +2,12 @@
 
 **Before merging a template-sync PR, read the entry it adds here and follow any listed instructions.**
 
+## 2026-10-13 — CDS light and dark palettes
+
+`--color-bg` and `--color-text` now use the CDS semantic colors, so the light background changes from white to the CDS background. In dark mode, `src/styles/theme.css` overrides the CDS background, text, and primary brand colors.
+
+When merging this sync, reconcile your own palette overrides in `theme.css`.
+
 ## 2026-10-13 — Light/Dark/System theme and unboxed sign-in
 
 The base layout now includes a Light/Dark/System selector, and the head script sets `<html theme>` to the resolved `light` or `dark` value before first paint. Saved `theme` choices keep working; `system`, missing, or invalid values follow the OS. The Stytch widget follows `--color-bg` and `--color-text` and no longer draws its own box.

@@ -5,7 +5,7 @@ test("applies saved dark mode before deferred scripts load", async ({ page }) =>
   await page.route("**/*", route => route.request().resourceType() === "script" ? route.abort() : route.continue())
   await page.goto("/sign-in")
   await expect(page.locator("html")).toHaveAttribute("theme", "dark")
-  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(0, 0, 0)")
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(28, 32, 38)")
 })
 
 test("supports system changes, explicit choices, persistence, and returning to system", async ({ page }) => {
