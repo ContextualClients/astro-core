@@ -1,53 +1,41 @@
-cds-sign-in { display: block; color: var(--cds-color-text); color-scheme: inherit; }
+cds-sign-in { display: block; }
 
-/* Stytch 6 sets theme variables inline on its root; keep these overrides scoped to CDS sign-in. */
+/* Stytch 6 writes its theme variables inline on this root, so overrides need !important.
+   Recheck the selector for both widget types when upgrading Stytch. */
 cds-sign-in :is(stytch-b2b, stytch-ui) > div > div[style] {
-  --st-dark-mode: var(--site-dark-mode) !important;
-  --st-secondary: var(--cds-color-bg-shade) !important;
-  --st-secondary-foreground: var(--cds-color-text) !important;
-  --st-muted: var(--cds-color-bg-shade) !important;
-  --st-accent: var(--cds-color-bg-shade) !important;
-  --st-accent-foreground: var(--cds-color-text) !important;
-  --st-border: var(--cds-color-bg-contrast) !important;
+  --st-color-scheme: light !important;
+  --st-dark-mode: 0 !important;
+  --st-background: var(--color-bg) !important;
+  --st-foreground: var(--color-text) !important;
+  --st-primary: var(--color-text) !important;
+  --st-primary-foreground: var(--color-bg) !important;
+  --st-secondary: color-mix(in srgb, var(--color-text) 12%, var(--color-bg)) !important;
+  --st-secondary-foreground: var(--color-text) !important;
+  --st-muted: color-mix(in srgb, var(--color-text) 12%, var(--color-bg)) !important;
+  --st-muted-foreground: color-mix(in srgb, var(--color-text) 75%, var(--color-bg)) !important;
+  --st-accent: color-mix(in srgb, var(--color-text) 12%, var(--color-bg)) !important;
+  --st-accent-foreground: var(--color-text) !important;
+  --st-border: color-mix(in srgb, var(--color-text) 50%, var(--color-bg)) !important;
+  --st-input: color-mix(in srgb, var(--color-text) 50%, var(--color-bg)) !important;
+  --st-ring: var(--color-text) !important;
   --st-font-family: var(--cds-font-family-body) !important;
   --st-font-family-mono: var(--cds-font-family-mono) !important;
   --st-text-base: var(--cds-font-size-body) !important;
   --st-container-width: 100% !important;
-  --st-color-scheme: var(--site-color-scheme) !important;
-  --st-background: var(--site-sign-in-background, var(--cds-color-bg)) !important;
-  --st-foreground: var(--cds-color-text) !important;
-  --st-primary: var(--site-action-bg) !important;
-  --st-primary-foreground: var(--site-action-text) !important;
-  --st-muted-foreground: var(--cds-color-text-gray) !important;
-  --st-input: color-mix(in srgb, var(--cds-color-text) 50%, var(--cds-color-bg)) !important;
-  --st-ring: var(--cds-color-text) !important;
-  --st-container-border: transparent;
-  --st-container-radius: 0;
   --st-button-radius: var(--cds-border-radius-step--1);
   --st-input-radius: var(--cds-border-radius-step--1);
-  --st-shadow: none;
-  --st-shadow-input: none;
-  --st-shadow-button: none;
   padding: 0;
   border: 0;
-  border-radius: 0;
-  box-shadow: none;
+  background: transparent;
+}
+
+:root[theme="dark"] cds-sign-in :is(stytch-b2b, stytch-ui) > div > div[style] {
+  --st-color-scheme: dark !important;
+  --st-dark-mode: 1 !important;
 }
 
 cds-sign-in input {
   min-height: 3rem;
-  padding: var(--cds-space-step-0) var(--cds-space-step-1);
-  background: var(--cds-color-bg);
-}
-
-cds-sign-in :is(input, button):focus-visible {
-  outline: 2px solid var(--cds-color-text);
-  outline-offset: 3px;
-}
-
-cds-sign-in input::placeholder {
-  color: var(--cds-color-text-gray);
-  opacity: 1;
 }
 
 cds-sign-in form {

@@ -5,7 +5,7 @@ test("applies saved dark mode before deferred scripts load", async ({ page }) =>
   await page.route("**/*", route => route.request().resourceType() === "script" ? route.abort() : route.continue())
   await page.goto("/sign-in")
   await expect(page.locator("html")).toHaveAttribute("theme", "dark")
-  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(28, 32, 38)")
+  await expect(page.locator("body")).toHaveCSS("background-color", "rgb(0, 0, 0)")
 })
 
 test("supports system changes, explicit choices, persistence, and returning to system", async ({ page }) => {
@@ -54,27 +54,29 @@ test("copies the theme before Astro swaps documents and responds to storage chan
 })
 
 for (const tag of ["stytch-b2b", "stytch-ui"]) {
-  test(`${tag} theme variables override inline defaults without a container box`, async ({ page }) => {
+  test(`${tag} follows the site colors without a container box`, async ({ page }) => {
     await page.goto("/sign-in")
+    // Mirrors the Stytch 6 root: inline light theme variables plus its container styles.
     await page.locator("cds-sign-in").evaluate((host, tag) => {
-      host.innerHTML = `<style>.fixture-root { padding: 40px 36px; border: 1px solid black; border-radius: 24px; box-shadow: 0 1px 4px black; }</style><${tag}><div><div class="fixture-root" style="--st-background: white; --st-foreground: black; --st-primary: black; --st-color-scheme: light;"><input aria-label="Fixture email" style="background:var(--st-background);color:var(--st-foreground)"></div></div></${tag}>`
+      host.innerHTML = `<style>.fixture-root { color-scheme: var(--st-color-scheme); padding: 40px 36px; border: 1px solid; background-color: var(--st-background); }</style><${tag}><div><div class="fixture-root" style="--st-background: white; --st-foreground: black; --st-color-scheme: light; --st-dark-mode: 0;"><input aria-label="Fixture email" style="background-color: var(--st-background); color: var(--st-foreground)"></div></div></${tag}>`
     }, tag)
     const root = page.locator(`${tag} > div > div[style]`)
+    const input = page.getByLabel("Fixture email")
     for (const theme of ["light", "dark"]) {
       await page.getByLabel("Theme", { exact: true }).selectOption(theme)
       await expect(root).toHaveCSS("padding", "0px")
       await expect(root).toHaveCSS("border-width", "0px")
-      await expect(root).toHaveCSS("box-shadow", "none")
-      const colors = await root.evaluate(element => {
+      await expect(root).toHaveCSS("background-color", "rgba(0, 0, 0, 0)")
+      expect(await root.evaluate(element => getComputedStyle(element).getPropertyValue("--st-dark-mode").trim())).toBe(theme === "dark" ? "1" : "0")
+      const body = await page.locator("body").evaluate(element => {
         const style = getComputedStyle(element)
-        const site = getComputedStyle(document.documentElement)
-        return { actual: style.getPropertyValue("--st-foreground").trim(), expected: site.getPropertyValue("--cds-color-text").trim() }
+        return { color: style.color, background: style.backgroundColor }
       })
-      expect(colors.actual).toBe(colors.expected)
+      await expect(input).toHaveCSS("color", body.color)
+      await expect(input).toHaveCSS("background-color", body.background)
     }
   })
 }
-
 
 test("ignores invalid stored preferences and follows the OS", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("theme", "invalid"))

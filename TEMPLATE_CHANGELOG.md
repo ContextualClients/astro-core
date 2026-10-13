@@ -2,20 +2,15 @@
 
 **Before merging a template-sync PR, read the entry it adds here and follow any listed instructions.**
 
-## 2026-09-18 — Shared light/dark theme and unboxed sign-in
+## 2026-10-13 — Light/Dark/System theme and unboxed sign-in
 
-The base layout now includes a Light/Dark/System selector. Theme colors live in `src/styles/theme.css` as CDS semantic variables; the old `--color-bg` and `--color-text` names remain aliases. The head script applies the selected theme before first paint and before Astro page swaps. Existing `theme` localStorage selections continue to work; missing or invalid values follow the OS.
-
-`src/styles/sign-in.css` maps both Stytch widget types to the site variables and removes the widget's outer box. The sign-in page supplies the heading, with `heading=""` on `cds-sign-in`. Stytch initializes with the selected colors and follows changes without remounting.
+The base layout now includes a Light/Dark/System selector, and the head script sets `<html theme>` to the resolved `light` or `dark` value before first paint. Saved `theme` choices keep working; `system`, missing, or invalid values follow the OS. The Stytch widget follows `--color-bg` and `--color-text` and no longer draws its own box.
 
 When merging this sync:
 
-- Reconcile your palette overrides in `theme.css`, and keep the inline theme preload in the head.
-- Move or remove the default layout's `ThemeToggle` if your site already has a theme control. Custom controls can dispatch `theme-change` with `light`, `dark`, or `system`.
-- Remove overlapping page-specific Stytch overrides after comparing them with `sign-in.css`. Put your desired width, padding, border, and background on your own container. Set `--site-sign-in-background` there when its surface differs from the page.
-- Preserve your existing auth configuration and component attributes. This change concerns presentation only.
-
-See the README for the event contract, CSS customization points, and Stytch upgrade considerations.
+- Keep the inline theme script in the head. Move or remove the default `ThemeToggle` if your site has its own control; custom controls can dispatch `theme-change`.
+- Replace any CSS that matches `[theme="system"]` with the resolved `light` or `dark` value.
+- Remove page-specific Stytch overrides that `src/styles/sign-in.css` now covers, and put width, padding, and background on your own container.
 
 ## 2026-09-06 — Configurable sign-in methods (Sign in with Google, optional magic links)
 

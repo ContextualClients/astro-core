@@ -12,7 +12,6 @@
     "preview": "astro preview",
     "astro": "astro",
     "release": "yarn build && ./bin/release.sh",
-    "check": "astro check",
     "test:browser": "playwright test"
   },
   "dependencies": {
