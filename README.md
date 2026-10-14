@@ -6,7 +6,7 @@ The Astro baseline used to generate Contextual Sites.
 
 `src/scaffold/scripts/preload/Theme.astro` sets `theme="light"` or `theme="dark"` on `<html>` from the saved choice or the OS. Its inline script runs before the body paints, so keep it inline and blocking. Its module script follows OS changes, other tabs, and Astro page swaps.
 
-`ThemeToggle.astro` adds a Light/Dark/System selector to the base layout. Move it into your own header, or replace it with a control that dispatches:
+`ThemeToggle.astro` adds a theme button to the base layout that cycles System, Light, and Dark. Move it into your own header, or replace it with a control that dispatches:
 
 ```js
 document.dispatchEvent(new CustomEvent("theme-change", { detail: "dark" })) // light, dark, or system
@@ -16,7 +16,7 @@ document.dispatchEvent(new CustomEvent("theme-change", { detail: "dark" })) // l
 
 ## Sign-in
 
-`src/styles/sign-in.css` removes the Stytch widget's box and maps its colors to `--color-bg` and `--color-text`. The page supplies the heading (`heading=""` on `cds-sign-in`) and any container. The stylesheet targets the Stytch 6 root, which sets its theme inline; recheck it when upgrading Stytch.
+`src/styles/sign-in.css` removes the Stytch widget's box and maps its colors to `--color-bg` and `--color-text`. `src/scaffold/AuthPanel.astro` supplies the heading (`heading=""` on `cds-sign-in`) and a centered container with a 24rem max width. The stylesheet targets the Stytch 6 root, which sets its theme inline; recheck it when upgrading Stytch.
 
 ## Checks
 

@@ -10,13 +10,13 @@ When merging this sync, reconcile your own palette overrides in `theme.css`.
 
 ## 2026-10-13 — Light/Dark/System theme and unboxed sign-in
 
-The base layout now includes a Light/Dark/System selector, and the head script sets `<html theme>` to the resolved `light` or `dark` value before first paint. Saved `theme` choices keep working; `system`, missing, or invalid values follow the OS. The Stytch widget follows `--color-bg` and `--color-text` and no longer draws its own box.
+The base layout now includes a theme button that cycles System, Light, and Dark, and the head script sets `<html theme>` to the resolved `light` or `dark` value before first paint. Saved `theme` choices keep working; `system`, missing, or invalid values follow the OS. The Stytch widget follows `--color-bg` and `--color-text` and no longer draws its own box; `/sign-in` wraps it in `AuthPanel`, a centered panel with a 24rem max width.
 
 When merging this sync:
 
 - Keep the inline theme script in the head. Move or remove the default `ThemeToggle` if your site has its own control; custom controls can dispatch `theme-change`.
 - Replace any CSS that matches `[theme="system"]` with the resolved `light` or `dark` value.
-- Remove page-specific Stytch overrides that `src/styles/sign-in.css` now covers, and put width, padding, and background on your own container.
+- Remove page-specific Stytch overrides that `src/styles/sign-in.css` now covers, and restyle or replace `AuthPanel` for your own sign-in layout.
 
 ## 2026-09-06 — Configurable sign-in methods (Sign in with Google, optional magic links)
 

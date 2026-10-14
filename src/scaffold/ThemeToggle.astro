@@ -1,35 +1,61 @@
 <theme-toggle>
-  <label>Theme
-    <select aria-label="Theme">
-      <option value="system">System</option>
-      <option value="light">Light</option>
-      <option value="dark">Dark</option>
-    </select>
-  </label>
+  <button type="button" aria-label="Theme: System">
+    <svg class="icon-system" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2" fill="none"/><path d="M8 21h8" fill="none"/><path d="M12 17v4" fill="none"/></svg>
+    <svg class="icon-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none"/><path d="M12 2v2M12 20v2m-7.07-17.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" fill="none"/></svg>
+    <svg class="icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="none"/></svg>
+  </button>
 </theme-toggle>
 <script>
+  const Labels = { system: "System", light: "Light", dark: "Dark" } as const
+  const NextPreference = { system: "light", light: "dark", dark: "system" } as const
+  type Preference = keyof typeof Labels
+  const isPreference = (value: string | undefined): value is Preference => value != null && value in Labels
+
   class ThemeToggle extends HTMLElement {
-    private select?: HTMLSelectElement
+    private button?: HTMLButtonElement
     private observer = new MutationObserver(() => this.update())
-    private update = () => {
-      if (this.select) this.select.value = document.documentElement.dataset.themePreference ?? "system"
+    private preference = (): Preference => {
+      const value = document.documentElement.dataset.themePreference
+      return isPreference(value) ? value : "system"
     }
-    private change = () => document.dispatchEvent(new CustomEvent("theme-change", { detail: this.select?.value }))
+    private update = () => {
+      const preference = this.preference()
+      this.button?.setAttribute("aria-label", `Theme: ${Labels[preference]}`)
+      this.button?.setAttribute("title", `Theme: ${Labels[preference]} (switch to ${Labels[NextPreference[preference]]})`)
+    }
+    private cycle = () => document.dispatchEvent(new CustomEvent("theme-change", { detail: NextPreference[this.preference()] }))
     connectedCallback() {
-      this.select = this.querySelector("select") ?? undefined
-      this.select?.addEventListener("change", this.change)
+      this.button = this.querySelector("button") ?? undefined
+      this.button?.addEventListener("click", this.cycle)
       this.observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme-preference"] })
       this.update()
     }
     disconnectedCallback() {
       this.observer.disconnect()
-      this.select?.removeEventListener("change", this.change)
+      this.button?.removeEventListener("click", this.cycle)
     }
   }
   customElements.define("theme-toggle", ThemeToggle)
 </script>
 <style>
-  label { display: inline-flex; align-items: center; gap: .5rem; }
-  select { min-height: 44px; padding: .5rem; border: 1px solid; border-radius: var(--cds-border-radius-step--1); background: var(--color-bg); color: var(--color-text); }
-  select:focus-visible { outline: 2px solid var(--color-text); outline-offset: 3px; }
+  button {
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--color-text) 20%, var(--color-bg));
+    border-radius: var(--cds-border-radius-step--1);
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+  button:hover { background: color-mix(in srgb, var(--color-text) 8%, var(--color-bg)); }
+  button:focus-visible { outline: 2px solid var(--color-text); outline-offset: 2px; }
+  svg { width: 1.25rem; height: 1.25rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-light, .icon-dark { display: none; }
+  :global(:root[data-theme-preference="light"]) .icon-light,
+  :global(:root[data-theme-preference="dark"]) .icon-dark { display: block; }
+  :global(:root[data-theme-preference="light"]) .icon-system,
+  :global(:root[data-theme-preference="dark"]) .icon-system { display: none; }
 </style>

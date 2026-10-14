@@ -2,8 +2,10 @@
   (() => {
     let preference
     try { preference = localStorage.getItem("theme") } catch {}
-    document.documentElement.setAttribute("theme", preference === "light" || preference === "dark"
+    const explicit = preference === "light" || preference === "dark"
+    document.documentElement.setAttribute("theme", explicit
       ? preference : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    document.documentElement.dataset.themePreference = explicit ? preference : "system"
   })()
 </script>
 <script>

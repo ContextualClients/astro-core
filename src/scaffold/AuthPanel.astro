@@ -1,0 +1,22 @@
+---
+type Props = { heading: string }
+const { heading } = Astro.props
+---
+<section class="auth-panel" aria-labelledby="auth-panel-heading">
+  <h1 id="auth-panel-heading">{heading}</h1>
+  <slot />
+</section>
+<style>
+  .auth-panel {
+    width: 100%;
+    max-width: 24rem;
+    margin: var(--cds-space-step-6) auto;
+    padding: var(--cds-space-step-3);
+    border: 1px solid color-mix(in srgb, var(--color-text) 15%, var(--color-bg));
+    border-radius: var(--cds-border-radius-step-1);
+  }
+  h1 {
+    margin: 0 0 var(--cds-space-step-3);
+    font-size: var(--cds-font-size-heading-three);
+  }
+</style>
