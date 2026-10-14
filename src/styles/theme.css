@@ -3,6 +3,10 @@
   --color-text: light-dark(#000, #fff);
 }
 
+/* The preload script sets the resolved theme; without it, the page follows the OS. */
+:root[theme="light"] { color-scheme: light; }
+:root[theme="dark"] { color-scheme: dark; }
+
 body {
   color: var(--color-text);
   background-color: var(--color-bg);

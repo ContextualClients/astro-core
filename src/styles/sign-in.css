@@ -1,0 +1,48 @@
+cds-sign-in { display: block; }
+
+/* Stytch 6 writes its theme variables inline on this root, so overrides need !important.
+   Recheck the selector for both widget types when upgrading Stytch. */
+cds-sign-in :is(stytch-b2b, stytch-ui) > div > div[style] {
+  --st-color-scheme: light !important;
+  --st-dark-mode: 0 !important;
+  --st-background: var(--color-bg) !important;
+  --st-foreground: var(--color-text) !important;
+  --st-primary: var(--color-text) !important;
+  --st-primary-foreground: var(--color-bg) !important;
+  --st-secondary: color-mix(in srgb, var(--color-text) 12%, var(--color-bg)) !important;
+  --st-secondary-foreground: var(--color-text) !important;
+  --st-muted: color-mix(in srgb, var(--color-text) 12%, var(--color-bg)) !important;
+  --st-muted-foreground: color-mix(in srgb, var(--color-text) 75%, var(--color-bg)) !important;
+  --st-accent: color-mix(in srgb, var(--color-text) 12%, var(--color-bg)) !important;
+  --st-accent-foreground: var(--color-text) !important;
+  --st-border: color-mix(in srgb, var(--color-text) 50%, var(--color-bg)) !important;
+  --st-input: color-mix(in srgb, var(--color-text) 50%, var(--color-bg)) !important;
+  --st-ring: var(--color-text) !important;
+  --st-font-family: var(--cds-font-family-body) !important;
+  --st-font-family-mono: var(--cds-font-family-mono) !important;
+  --st-text-base: var(--cds-font-size-body) !important;
+  --st-container-width: 100% !important;
+  --st-button-radius: var(--cds-border-radius-step--1);
+  --st-input-radius: var(--cds-border-radius-step--1);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+:root[theme="dark"] cds-sign-in :is(stytch-b2b, stytch-ui) > div > div[style] {
+  --st-color-scheme: dark !important;
+  --st-dark-mode: 1 !important;
+}
+
+cds-sign-in input {
+  min-height: 3rem;
+}
+
+cds-sign-in form {
+  gap: var(--cds-space-step-1) !important;
+}
+
+cds-sign-in button[type="submit"] {
+  min-height: 3rem;
+  font-weight: var(--cds-raw-font-weight-semi-bold);
+}

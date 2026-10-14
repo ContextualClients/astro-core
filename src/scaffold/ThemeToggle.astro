@@ -1,0 +1,35 @@
+<theme-toggle>
+  <label>Theme
+    <select aria-label="Theme">
+      <option value="system">System</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+    </select>
+  </label>
+</theme-toggle>
+<script>
+  class ThemeToggle extends HTMLElement {
+    private select?: HTMLSelectElement
+    private observer = new MutationObserver(() => this.update())
+    private update = () => {
+      if (this.select) this.select.value = document.documentElement.dataset.themePreference ?? "system"
+    }
+    private change = () => document.dispatchEvent(new CustomEvent("theme-change", { detail: this.select?.value }))
+    connectedCallback() {
+      this.select = this.querySelector("select") ?? undefined
+      this.select?.addEventListener("change", this.change)
+      this.observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme-preference"] })
+      this.update()
+    }
+    disconnectedCallback() {
+      this.observer.disconnect()
+      this.select?.removeEventListener("change", this.change)
+    }
+  }
+  customElements.define("theme-toggle", ThemeToggle)
+</script>
+<style>
+  label { display: inline-flex; align-items: center; gap: .5rem; }
+  select { min-height: 44px; padding: .5rem; border: 1px solid; border-radius: var(--cds-border-radius-step--1); background: var(--color-bg); color: var(--color-text); }
+  select:focus-visible { outline: 2px solid var(--color-text); outline-offset: 3px; }
+</style>

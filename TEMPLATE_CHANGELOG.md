@@ -2,6 +2,16 @@
 
 **Before merging a template-sync PR, read the entry it adds here and follow any listed instructions.**
 
+## 2026-10-13 — Light/Dark/System theme and unboxed sign-in
+
+The base layout now includes a Light/Dark/System selector, and the head script sets `<html theme>` to the resolved `light` or `dark` value before first paint. Saved `theme` choices keep working; `system`, missing, or invalid values follow the OS. The Stytch widget follows `--color-bg` and `--color-text` and no longer draws its own box.
+
+When merging this sync:
+
+- Keep the inline theme script in the head. Move or remove the default `ThemeToggle` if your site has its own control; custom controls can dispatch `theme-change`.
+- Replace any CSS that matches `[theme="system"]` with the resolved `light` or `dark` value.
+- Remove page-specific Stytch overrides that `src/styles/sign-in.css` now covers, and put width, padding, and background on your own container.
+
 ## 2026-09-06 — Configurable sign-in methods (Sign in with Google, optional magic links)
 
 `config.json` accepts an optional `stytchConfig` object. Its `authMethods` list names the sign-in methods in display order: `magic-link` plus any Stytch OAuth provider name (`google`, `microsoft`, `github`, `slack`, `hubspot`, `apple`, `facebook`, `linkedin`, etc. — the full supported list is the `StytchAuthMethod` enum in `src/config/index.ts`). B2B Stytch projects support only `google`, `microsoft`, `github`, `slack` and `hubspot`; the rest are Consumer-only and are dropped with a console warning on a B2B site. When `stytchConfig` or `authMethods` is absent it defaults to `["magic-link"]`.
