@@ -6,7 +6,7 @@ The Astro baseline used to generate Contextual Sites.
 
 `src/scaffold/scripts/preload/Theme.astro` sets `theme="light"` or `theme="dark"` on `<html>` from the saved choice or the OS. Its inline script runs before the body paints, so keep it inline and blocking. Its module script follows OS changes, other tabs, and Astro page swaps.
 
-`ThemeToggle.astro` adds a theme button to the base layout that cycles System, Light, and Dark. Move it into your own header, or replace it with a control that dispatches:
+`ThemeToggle.astro` adds a System, Light, and Dark switch to the base layout. System follows the OS; Light or Dark overrides it. Move it into your own header, or replace it with a control that dispatches:
 
 ```js
 document.dispatchEvent(new CustomEvent("theme-change", { detail: "dark" })) // light, dark, or system

@@ -1,61 +1,67 @@
 <theme-toggle>
-  <button type="button" aria-label="Theme: System">
-    <svg class="icon-system" viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2" fill="none"/><path d="M8 21h8" fill="none"/><path d="M12 17v4" fill="none"/></svg>
-    <svg class="icon-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none"/><path d="M12 2v2M12 20v2m-7.07-17.07 1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" fill="none"/></svg>
-    <svg class="icon-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" fill="none"/></svg>
-  </button>
+  <fieldset>
+    <legend>Theme</legend>
+    <label><input type="radio" name="theme-preference" value="system" checked />System</label>
+    <label><input type="radio" name="theme-preference" value="light" />Light</label>
+    <label><input type="radio" name="theme-preference" value="dark" />Dark</label>
+  </fieldset>
 </theme-toggle>
 <script>
-  const Labels = { system: "System", light: "Light", dark: "Dark" } as const
-  const NextPreference = { system: "light", light: "dark", dark: "system" } as const
-  type Preference = keyof typeof Labels
-  const isPreference = (value: string | undefined): value is Preference => value != null && value in Labels
-
   class ThemeToggle extends HTMLElement {
-    private button?: HTMLButtonElement
     private observer = new MutationObserver(() => this.update())
-    private preference = (): Preference => {
-      const value = document.documentElement.dataset.themePreference
-      return isPreference(value) ? value : "system"
-    }
     private update = () => {
-      const preference = this.preference()
-      this.button?.setAttribute("aria-label", `Theme: ${Labels[preference]}`)
-      this.button?.setAttribute("title", `Theme: ${Labels[preference]} (switch to ${Labels[NextPreference[preference]]})`)
+      const preference = document.documentElement.dataset.themePreference ?? "system"
+      for (const input of this.querySelectorAll("input")) input.checked = input.value === preference
     }
-    private cycle = () => document.dispatchEvent(new CustomEvent("theme-change", { detail: NextPreference[this.preference()] }))
+    private change = (event: Event) => {
+      if (event.target instanceof HTMLInputElement) document.dispatchEvent(new CustomEvent("theme-change", { detail: event.target.value }))
+    }
     connectedCallback() {
-      this.button = this.querySelector("button") ?? undefined
-      this.button?.addEventListener("click", this.cycle)
+      this.addEventListener("change", this.change)
       this.observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme-preference"] })
       this.update()
     }
     disconnectedCallback() {
       this.observer.disconnect()
-      this.button?.removeEventListener("click", this.cycle)
+      this.removeEventListener("change", this.change)
     }
   }
   customElements.define("theme-toggle", ThemeToggle)
 </script>
 <style>
-  button {
-    display: inline-grid;
-    place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0;
+  fieldset {
+    display: inline-flex;
+    gap: 2px;
+    margin: 0;
+    padding: 2px;
     border: 1px solid color-mix(in srgb, var(--color-text) 20%, var(--color-bg));
-    border-radius: var(--cds-border-radius-step--1);
-    background: transparent;
-    color: var(--color-text);
+    border-radius: var(--cds-border-radius-step-0);
+  }
+  legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  label {
+    position: relative;
+    padding: var(--cds-space-step--1) var(--cds-space-step-1);
+    border-radius: calc(var(--cds-border-radius-step-0) - 2px);
+    color: color-mix(in srgb, var(--color-text) 70%, var(--color-bg));
+    font-size: .875rem;
+    line-height: 1.5;
     cursor: pointer;
   }
-  button:hover { background: color-mix(in srgb, var(--color-text) 8%, var(--color-bg)); }
-  button:focus-visible { outline: 2px solid var(--color-text); outline-offset: 2px; }
-  svg { width: 1.25rem; height: 1.25rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .icon-light, .icon-dark { display: none; }
-  :global(:root[data-theme-preference="light"]) .icon-light,
-  :global(:root[data-theme-preference="dark"]) .icon-dark { display: block; }
-  :global(:root[data-theme-preference="light"]) .icon-system,
-  :global(:root[data-theme-preference="dark"]) .icon-system { display: none; }
+  label:hover { color: var(--color-text); }
+  label:has(:focus-visible) { outline: 2px solid var(--color-text); outline-offset: 1px; }
+  input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+  /* The preload script sets data-theme-preference before first paint, so the selection never flashes. */
+  :global(:root:not([data-theme-preference="light"], [data-theme-preference="dark"])) label:has([value="system"]),
+  :global(:root[data-theme-preference="light"]) label:has([value="light"]),
+  :global(:root[data-theme-preference="dark"]) label:has([value="dark"]) {
+    background: color-mix(in srgb, var(--color-text) 12%, var(--color-bg));
+    color: var(--color-text);
+  }
 </style>
