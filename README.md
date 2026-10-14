@@ -20,4 +20,4 @@ document.dispatchEvent(new CustomEvent("theme-change", { detail: "dark" })) // l
 
 ## Checks
 
-Use Node 24 and `yarn install`. Run `yarn astro check`, `yarn test:browser`, and `yarn build`. Install the test browser once with `yarn playwright install chromium`.
+Use Node 24 and `yarn install`. Run `yarn astro check` and `yarn build`.
