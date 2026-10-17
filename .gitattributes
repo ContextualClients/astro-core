@@ -1,0 +1,11 @@
+# How a template sync merges each file.
+# To opt a file or directory path out of syncing entirely, list it in .templatesyncignore instead.
+# Each merge=<name> below is either built into git or a custom strategy from ./bin/merge/<name>.ts.
+
+# Combine changes from template and from this site
+.gitattributes       merge=union
+.templatesyncignore  merge=union
+.gitignore           merge=union
+
+# Custom merge strategies
+package.json         merge=package-json

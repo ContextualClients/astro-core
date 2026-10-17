@@ -1,4 +1,6 @@
-# Matches in this file will not be included in the template-sync GitHub action PRs
+# Paths to files or directories that this site owns outright: once this site has changed one, a
+# template sync will never overwrite it. (A path this site has never touched still follows the
+# template, since there is nothing of its own to keep.)
 
 # Per-site environment / local config
 site-auth.local.json
@@ -6,3 +8,7 @@ config.json
 
 # Per-site identity / docs
 README.md
+CHANGELOG.md
+
+# Per-site record of the last template commit taken
+.template-sync-ref

@@ -13,8 +13,9 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   build:
     runs-on: ubuntu-latest
-    # This action should only run on template clones
-    if: ${{ !github.event.repository.is_template }}
+    # Skip the clone-creation event — initial release is kicked off by a
+    # follow-up commit from the Contextual platform
+    if: ${{ !github.event.created }}
     steps:
       - uses: actions/checkout@v7
         with:
