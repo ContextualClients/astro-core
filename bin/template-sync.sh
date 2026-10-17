@@ -43,6 +43,66 @@ template_version () {
   git show "$1:package.json" | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version"
 }
 
+# Template changelog entries newer than any this site already has.
+template_changelog_entries () {
+  local seen
+  seen=$(git show "$1:TEMPLATE_CHANGELOG.md" 2>/dev/null | grep '^## ' || true)
+  git show "$2:TEMPLATE_CHANGELOG.md" 2>/dev/null | SEEN="${seen}" awk '
+    BEGIN { n = split(ENVIRON["SEEN"], headings, "\n"); for (i = 1; i <= n; i++) seen[headings[i]] = 1 }
+    /^## / { if ($0 in seen) exit; found = 1 }
+    found'
+}
+
+# The PR description's conflict section: a prompt for resolving it with an AI assistant, each
+# conflicted file with links to its conflicts, and what the template changed in each file.
+conflict_report () {
+  local commit=$1 files=$2 url="https://github.com/${GITHUB_REPOSITORY}/blob/$1"
+  local path start end links change list="" changes=""
+  while IFS= read -r path; do
+    links=""
+    while read -r start end; do
+      links+="${links:+, }[lines ${start}–${end}](${url}/${path}#L${start}-L${end})"
+    done < <(git show "${commit}:${path}" 2>/dev/null \
+      | awk '/^<<<<<<< / { start = NR } /^>>>>>>> / && start { print start, NR; start = 0 }')
+    list+=$'\n'"- [\`${path}\`](${url}/${path}): ${links:-no conflict markers, because one side edited this file and the other deleted it}"
+    if [ "${path}" = yarn.lock ]; then
+      list+=". Resolve \`package.json\` first, then regenerate this file with \`yarn install\` instead of editing the markers."
+      continue
+    fi
+    change=$(git diff "${last_sync_commit}" "${template_head}" -- "${path}")
+    if [ -n "${change}" ] && [ "$(wc -l <<< "${change}")" -le 150 ] && [ "${#changes}" -lt 30000 ]; then
+      changes+=$'\n\n'"<details><summary>What the template changed in <code>${path}</code></summary>"$'\n\n````diff\n'"${change}"$'\n````\n\n</details>'
+    fi
+  done <<< "${files}"
+
+  echo "> [!WARNING]"
+  echo "> This sync could not be merged cleanly. Resolve the conflict markers in the files below on this branch before merging. In each conflict, the part after \`<<<<<<<\` is this site's version and the part between \`=======\` and \`>>>>>>>\` is the template's new version."
+  echo
+  echo "To have an AI assistant resolve it, give it this prompt:"
+  echo
+  echo '````text'
+  cat <<EOF
+Resolve the merge conflicts in a template sync for a Contextual site.
+
+The repository https://github.com/${GITHUB_REPOSITORY} is a site built from the astro-core template. Its branch ${branch} merges astro-core @ ${template_head_short} into the site, and the merge left conflict markers committed in these files:
+$(sed 's/^/- /' <<< "${files}")
+
+In each conflict, the part after <<<<<<< is this site's version and the part between ======= and >>>>>>> is the template's new version.
+
+1. Clone the repository if needed, then check out the branch: git fetch origin ${branch} && git switch ${branch}
+2. For each conflicted file, see what the template changed: git diff ${last_sync_commit:0:7} ${template_head_short} -- <file>
+3. Resolve every conflict so the file keeps this site's own changes and also applies the template's change. Only drop one side's change when the other side clearly replaces it, and tell me when you do.
+4. If package.json conflicts, keep this site's own dependencies and scripts while taking the template's updates. Never hand-edit yarn.lock: once package.json is resolved, regenerate it with yarn install.
+5. Read the new entries at the top of TEMPLATE_CHANGELOG.md and follow any instructions in them.
+6. Check that no conflict markers remain (git grep -nE '^(<<<<<<<|>>>>>>>) '), then run yarn install and yarn build.
+7. Commit the resolution to this branch and push it.
+8. Take the pull request out of draft so it can be reviewed: gh pr ready ${branch}. Don't merge it.
+9. Summarize how you resolved each conflict.
+EOF
+  echo '````'
+  echo "${list}${changes}"
+}
+
 if git merge-base --is-ancestor "${template_head}" "${last_sync_commit}"; then
   echo "Already up to date with astro-core @ ${template_head_short}."
   exit 0
@@ -69,10 +129,11 @@ pre_sync_tree=$(git rev-parse 'HEAD^{tree}')
 
 # Commit conflict markers when changes cannot be reconciled.
 if ! git merge --no-edit -m "chore(template): sync astro-core template" "${template_head}"; then
-  conflict_note=$'\n\n> [!WARNING]\n> This sync could not be merged cleanly. Resolve conflict markers on this branch before merging.'
+  conflicted_files=$(git diff --name-only --diff-filter=U)
   draft_on_conflict=--draft # Conflicted branches land as draft PRs to ensure they're handled.
   git add -A
   git commit -m "chore(template): sync astro-core template (unresolved conflicts)"
+  conflict_note=$(conflict_report "$(git rev-parse HEAD)" "${conflicted_files}")
 fi
 
 # If any changeset files from the template slip through then they will block the clone's
@@ -113,11 +174,18 @@ if git ls-remote --exit-code --heads origin "${branch}" > /dev/null 2>&1; then
 fi
 
 # Open a PR with the sync results.
+body="Syncs \`astro-core\` @ \`${template_head_short}\`."
+if [ -n "${conflict_note}" ]; then
+  body+=$'\n\n'"${conflict_note}"
+fi
+changelog_entries=$(template_changelog_entries "${last_sync_commit}" "${template_head}")
+if [ -n "${changelog_entries}" ]; then
+  body+=$'\n\n'"What changed in the template, from \`TEMPLATE_CHANGELOG.md\`. Follow any instructions before merging."$'\n\n'"${changelog_entries}"
+fi
+
 git push -u origin "${branch}"
 gh pr create ${draft_on_conflict} \
   --base "${GITHUB_REF_NAME}" \
   --head "${branch}" \
   --title "chore(template): sync astro-core @ ${template_head_short}" \
-  --body "Syncs \`astro-core\` @ \`${template_head_short}\`.
-
-⚠️ **Read \`TEMPLATE_CHANGELOG.md\` in this diff before merging.**${conflict_note}"
+  --body "${body}"
