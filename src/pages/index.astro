@@ -1,12 +1,13 @@
 ---
 import Layout from "@/scaffold/Layout.astro"
+import CtxlLogo from "@/components/CtxlLogo.svg"
 import { config } from "@/config"
 
 const authConfig = Astro.locals.authConfig
 const siteUser = Astro.locals.siteUser
 ---
 <Layout>
-  <h1>Home</h1>
+  <h1 class="astro-core"><CtxlLogo /><a href="/">Astro Core</a></h1>
   <cds-user
     site-user={siteUser ? JSON.stringify(siteUser) : undefined}
     public-token={authConfig?.publicToken}
@@ -15,3 +16,53 @@ const siteUser = Astro.locals.siteUser
     keep-alive={config.sessions.extendWithUse}
   ></cds-user>
 </Layout>
+
+<style is:global>
+h1.astro-core {
+  margin-block-end: var(--cds-space-step-4);
+
+  svg {
+    width: var(--cds-font-size-heading-one);
+    height: var(--cds-font-size-heading-one);
+    margin-inline-end: var(--cds-space-step-1);
+    vertical-align: middle;
+    transition: transform var(--cds-animation-spring) 1300ms 300ms;
+    will-change: transform;
+  }
+
+  a {
+    position: relative;
+    display: inline-block;
+    text-decoration: none;
+    color: var(--color-text);
+
+    &::before {
+      content: "";
+      display: inline-block;
+      position: absolute;
+      height: 4px;
+      bottom: -5px;
+      right: 0;
+      left: 0;
+      background: var(--cds-color-brand-primary);
+      z-index: -1;
+      transform: scaleX(0);
+      transform-origin: bottom left;
+      transition: transform 350ms var(--cds-raw-animation-easing-default);
+      will-change: transform;
+    }
+  }
+
+  &:has(> *:hover), &:has(> *:focus) {
+    svg {
+      transform: rotate(90deg);
+      transition-delay: 375ms;
+    }
+    a::before {
+      transform: scaleX(1);
+      transform-origin: bottom right;
+      transition-delay: 100ms;
+    }
+  }
+}
+</style>
