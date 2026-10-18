@@ -2,6 +2,4 @@
 # template sync will never overwrite it. (A path this site has never touched still follows the
 # template, since there is nothing of its own to keep.)
 #
-# This list is this site's alone, and its entries take precedence over every rule in .gitattributes.
-# One path per line; a bare name matches at any depth, as in .gitignore, and a leading ./ pins an
-# entry to the repo root. The template's own defaults live in .gitattributes.
+# Entries here take precedence over rules in .gitattributes. The template's defaults live there.
