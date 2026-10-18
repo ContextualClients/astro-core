@@ -15,8 +15,8 @@
 # Custom merge strategies
 package.json         merge=package-json
 
-# Files each site makes its own: once a site has changed one, it keeps its copy in every sync.
-# A site that hasn't changed one keeps following the template.
+# Files each site makes its own: once a site changes one, the site's version is kept in every sync.
+# Until one of these files is changed, it keeps following the template.
 site-auth.local.json       merge=ours
 config.json                merge=ours
 README.md                  merge=ours
