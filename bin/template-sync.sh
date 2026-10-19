@@ -64,7 +64,7 @@ conflict_report () {
       links+="${links:+, }[lines ${start}–${end}](${url}/${path}#L${start}-L${end})"
     done < <(git show "${commit}:${path}" 2>/dev/null \
       | awk '/^<<<<<<< / { start = NR } /^>>>>>>> / && start { print start, NR; start = 0 }')
-    list+=$'\n'"- [\`${path}\`](${url}/${path}): ${links:-no conflict markers, because one side edited this file and the other deleted it}"
+    list+=$'\n'"- [\`${path}\`](${url}/${path}): ${links:-no conflict markers (a binary file, or one side edited it and the other deleted it), so check which version this branch kept}"
     if [ "${path}" = yarn.lock ]; then
       list+=". Resolve \`package.json\` first, then regenerate this file with \`yarn install\` instead of editing the markers."
       continue
@@ -187,7 +187,7 @@ fi
 title="chore(template): sync astro-core @ ${template_head_short}"
 git push --force -u origin "${branch}"
 if [ -z "${pending_pr}" ]; then
-  gh pr create ${draft_on_conflict} --base "${GITHUB_REF_NAME}" --head "${branch}" --title "${title}" --body "${body}"
+  gh pr create ${draft_on_conflict} --base "${DEFAULT_BRANCH}" --head "${branch}" --title "${title}" --body "${body}"
 else
   gh pr edit "${pending_pr}" --title "${title}" --body "${body}"
   is_draft=$(gh pr view "${pending_pr}" --json isDraft --jq .isDraft)
