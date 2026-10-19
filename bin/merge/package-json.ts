@@ -3,24 +3,32 @@ import { readFileSync, writeFileSync } from "node:fs"
 
 type Entries = Record<string, string>
 type PackageJson = Record<string, unknown>
-type ManagedField = { field: string, type: "entries" | "string" }
 
-const managedFields: ManagedField[] = [
-  { field: "dependencies", type: "entries" },
-  { field: "devDependencies", type: "entries" },
-  { field: "scripts", type: "entries" },
-  { field: "engines", type: "entries" },
-  { field: "type", type: "string" },
-]
+const siteOwnedFields = ["name", "version", "description"]
+
+const readManifest = (path: string): PackageJson => JSON.parse(readFileSync(path, "utf8"))
 
 const [ancestorPath, ourPath, theirPath] = process.argv.slice(2)
-const [basePackage, ourPkgJson, theirPkgJson] = [ancestorPath, ourPath, theirPath]
-  .map(path => JSON.parse(readFileSync(path, "utf8")) as PackageJson)
+const [basePackage, ourPkgJson, theirPkgJson] = [ancestorPath, ourPath, theirPath].map(readManifest)
+
+const mergedFields = [...new Set([basePackage, ourPkgJson, theirPkgJson].flatMap(Object.keys))]
+  .filter(field => !siteOwnedFields.includes(field))
+
+const isEntries = (value: unknown): value is Entries =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+  && Object.values(value).every(entry => typeof entry === "string")
+
+const entriesOf = (pkgJson: PackageJson, field: string): Entries => {
+  const value = pkgJson[field]
+  return isEntries(value) ? value : {}
+}
+
+const isSame = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b)
 
 const mergeEntries = (field: string, conflicts: string[]): unknown => {
-  const base = (basePackage[field] ?? {}) as Entries
-  const ours = (ourPkgJson[field] ?? {}) as Entries
-  const theirs = (theirPkgJson[field] ?? {}) as Entries
+  const base = entriesOf(basePackage, field)
+  const ours = entriesOf(ourPkgJson, field)
+  const theirs = entriesOf(theirPkgJson, field)
   const merged: Entries = { ...ours }
 
   for (const name of new Set([...Object.keys(base), ...Object.keys(theirs)])) {
@@ -33,7 +41,8 @@ const mergeEntries = (field: string, conflicts: string[]): unknown => {
       merged[name] = theirs[name]
     }
   }
-  return Object.keys(merged).length || field in ourPkgJson ? merged : undefined
+  const templateRemoved = field in basePackage && !(field in theirPkgJson)
+  return Object.keys(merged).length || (field in ourPkgJson && !templateRemoved) ? merged : undefined
 }
 
 const mergeValue = (field: string, conflicts: string[]): unknown => {
@@ -41,24 +50,29 @@ const mergeValue = (field: string, conflicts: string[]): unknown => {
   const ours = ourPkgJson[field]
   const theirs = theirPkgJson[field]
 
-  if (ours === theirs || theirs === base) return ours
-  if (ours === base) return theirs
+  if (isSame(ours, theirs) || isSame(theirs, base)) return ours
+  if (isSame(ours, base)) return theirs
   conflicts.push(field)
   return ours
 }
 
+const mergeField = (field: string, conflicts: string[]): unknown =>
+  [basePackage, ourPkgJson, theirPkgJson].every(pkgJson => pkgJson[field] === undefined || isEntries(pkgJson[field]))
+    ? mergeEntries(field, conflicts)
+    : mergeValue(field, conflicts)
+
 const mergeManifest = (): [PackageJson, string[]] => {
   const conflicts: string[] = []
   const manifest: PackageJson = { ...ourPkgJson }
-  for (const { field, type } of managedFields) {
-    manifest[field] = type === "entries" ? mergeEntries(field, conflicts) : mergeValue(field, conflicts)
+  for (const field of mergedFields) {
+    manifest[field] = mergeField(field, conflicts)
   }
   return [manifest, conflicts]
 }
 
 const manifestWithFieldsFrom = (sourcePkgJson: PackageJson): PackageJson => {
   const manifest: PackageJson = { ...ourPkgJson }
-  for (const { field } of managedFields) {
+  for (const field of mergedFields) {
     manifest[field] = sourcePkgJson[field]
   }
   return manifest
