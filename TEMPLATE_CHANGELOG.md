@@ -15,7 +15,7 @@ A new `.gitattributes` sits alongside it, describing how the sync merges particu
 
 **Sync PRs can now contain conflicts.** When the template and your site have edited the same lines, the PR arrives with conflict markers committed on its branch and a warning in the description. Resolve them on that branch before merging. A clean sync looks exactly as it always did.
 
-**Only one sync PR is open at a time.** If the template moves again before you merge one, that PR is closed and replaced by a new one carrying both rounds. Commits you pushed to the old branch — conflict resolutions included — are not carried over, so if you have started resolving one, finish and merge it before the template moves again.
+**Only one sync PR is open at a time.** If the template moves again before you merge one, the open PR is updated to carry both rounds. Once you have pushed commits to it — conflict resolutions included — it is left as it is instead, and the next sync after you merge it brings the rest.
 
 `yarn.lock` is the one conflict not worth reading. Resolve `package.json` first, then regenerate the lockfile with `yarn install` rather than editing the markers.
 

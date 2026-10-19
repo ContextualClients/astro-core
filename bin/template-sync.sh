@@ -111,11 +111,18 @@ fi
 # Named for the commit being synced from, so if a sync round is missed the branch name is reused.
 branch="template-sync/from-${last_sync_commit:0:7}" # Slice instead of --short to guarantee consistency
 
-# Leave a pending sync alone when it already carries this template commit.
-if git fetch --no-tags origin "${branch}" 2>/dev/null \
-  && [ "$(git show "FETCH_HEAD:${sync_ref_file}")" = "${template_head}" ]; then
-  echo "Sync for astro-core @ ${template_head_short} is already open."
-  exit 0
+# An open sync PR is updated in place below, unless it already carries this template commit or
+# someone has pushed commits of their own to it.
+pending_pr=$(gh pr list --head "${branch}" --state open --json number --jq '.[0].number // empty')
+if [ -n "${pending_pr}" ] && git fetch --no-tags origin "${branch}" 2>/dev/null; then
+  if [ "$(git show "FETCH_HEAD:${sync_ref_file}")" = "${template_head}" ]; then
+    echo "Sync for astro-core @ ${template_head_short} is already open in #${pending_pr}."
+    exit 0
+  fi
+  if [ -n "$(git rev-list "$(git log -1 --format=%H --author=ContextualDevOps FETCH_HEAD)..FETCH_HEAD")" ]; then
+    echo "#${pending_pr} has commits of its own; merge it before syncing astro-core @ ${template_head_short}."
+    exit 0
+  fi
 fi
 
 # Land all changes on the sync branch; never on the default branch.
@@ -166,13 +173,6 @@ echo "${template_head}" > "${sync_ref_file}"
 git add "${sync_ref_file}"
 git commit -m "chore(template): record astro-core @ ${template_head_short} as synced"
 
-# If the last sync PR was never merged, close it. This sync carries that PRs changes as well.
-if git ls-remote --exit-code --heads origin "${branch}" > /dev/null 2>&1; then
-  gh pr close "${branch}" --delete-branch \
-    --comment "Superseded by a sync carrying astro-core @ ${template_head_short}. Commits added to this branch (conflict resolutions, etc.) will need to be reapplied on the new PR." \
-    || git push origin --delete "${branch}"
-fi
-
 # Open a PR with the sync results.
 body="Syncs \`astro-core\` @ \`${template_head_short}\`."
 if [ -n "${conflict_note}" ]; then
@@ -183,9 +183,16 @@ if [ -n "${changelog_entries}" ]; then
   body+=$'\n\n'"What changed in the template, from \`TEMPLATE_CHANGELOG.md\`. Follow any instructions before merging."$'\n\n'"${changelog_entries}"
 fi
 
-git push -u origin "${branch}"
-gh pr create ${draft_on_conflict} \
-  --base "${GITHUB_REF_NAME}" \
-  --head "${branch}" \
-  --title "chore(template): sync astro-core @ ${template_head_short}" \
-  --body "${body}"
+title="chore(template): sync astro-core @ ${template_head_short}"
+git push --force -u origin "${branch}"
+if [ -z "${pending_pr}" ]; then
+  gh pr create ${draft_on_conflict} --base "${GITHUB_REF_NAME}" --head "${branch}" --title "${title}" --body "${body}"
+else
+  gh pr edit "${pending_pr}" --title "${title}" --body "${body}"
+  is_draft=$(gh pr view "${pending_pr}" --json isDraft --jq .isDraft)
+  if [ -n "${draft_on_conflict}" ] && [ "${is_draft}" = false ]; then
+    gh pr ready "${pending_pr}" --undo
+  elif [ -z "${draft_on_conflict}" ] && [ "${is_draft}" = true ]; then
+    gh pr ready "${pending_pr}"
+  fi
+fi
