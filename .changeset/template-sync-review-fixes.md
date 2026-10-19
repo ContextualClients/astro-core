@@ -9,3 +9,4 @@ fix(template-sync): merge every package.json field and keep pending syncs intact
 - A sync branch whose PR was never opened no longer stops later syncs.
 - Every template changeset the merge brings in is dropped, including ones edited upstream.
 - The sync's own changeset reads `chore(template): sync astro-core @ <commit>`.
+- Sync runs never overlap, and a manually triggered run still syncs and targets the default branch.
