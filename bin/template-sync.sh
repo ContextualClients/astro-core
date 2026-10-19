@@ -160,9 +160,9 @@ if [ -d .changeset ] && [ "$(git rev-parse 'HEAD^{tree}')" != "${pre_sync_tree}"
     echo "---"
     echo
     if [ "$(template_version "${last_sync_commit}")" = "$(template_version "${template_head}")" ]; then
-      echo "Sync the astro-core template @ ${template_head_short}."
+      echo "chore(template): sync astro-core @ ${template_head_short}"
     else
-      echo "Sync the astro-core template $(template_version "${last_sync_commit}") → $(template_version "${template_head}")."
+      echo "chore(template): sync astro-core $(template_version "${last_sync_commit}") → $(template_version "${template_head}")"
     fi
   } > ".changeset/template-sync-${template_head_short}.md"
   git add ".changeset/template-sync-${template_head_short}.md"
