@@ -143,9 +143,10 @@ if ! git merge --no-edit -m "chore(template): sync astro-core template" "${templ
   conflict_note=$(conflict_report "$(git rev-parse HEAD)" "${conflicted_files}")
 fi
 
-# If any changeset files from the template slip through then they will block the clone's
-# release process. This should never happen anyway, but if it does: remove them.
-template_changesets=$(git diff --name-only --diff-filter=A "${last_sync_commit}" "${template_head}" -- .changeset)
+# Changesets the merge brought in are the template's own and would block this site's releases.
+template_changesets=$(comm -13 \
+  <(git ls-tree -r --name-only "${pre_sync_tree}" -- .changeset | sort) \
+  <(git ls-tree -r --name-only HEAD -- .changeset | grep '\.md$' | grep -v '/README\.md$' | sort))
 if [ -n "${template_changesets}" ]; then
   echo "${template_changesets}" | xargs git rm -q --ignore-unmatch --
   git commit -m "chore(template): drop changesets that reference the template"
