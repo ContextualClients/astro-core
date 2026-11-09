@@ -2,6 +2,12 @@
 
 **Before merging a template-sync PR, read the entry it adds here and follow any listed instructions.**
 
+## 2026-11-09 — Build the site as a Worker
+
+A site can now also run as a Worker on the `site-worker` managed worker. `DEPLOYMENT` chooses the build: `AGENT`, the default, is the site-agent build every site uses today and is unchanged; `WORKER` builds a standalone server that reads the visitor's sign-in from the Worker's gateway. This sync adds a root `Dockerfile` (with `docker/worker-shutdown.mjs`) that builds the Worker image, a `.dockerignore`, and `src/lib/gateway.ts`, and changes `astro.config.mjs` and `src/middleware.ts`.
+
+Nothing to do for a site that stays a site agent. If you have changed `astro.config.mjs` or `src/middleware.ts`, keep your changes and take the template's `DEPLOYMENT` additions when resolving the sync.
+
 ## 2026-10-17 — Template syncs now merge instead of overwriting
 
 Template syncs used to replace each shared file wholesale, so any edit you made to a template-owned file was lost unless you listed that file in `.templatesyncignore`. Syncs are now an ordinary three-way merge against the template: you receive the template's changes hunk by hunk, your own edits to the same files survive, and only genuinely overlapping edits stop to ask.
