@@ -11,11 +11,55 @@ permissions:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  build:
+  legacy-build:
     runs-on: ubuntu-latest
     # Skip the clone-creation event — initial release is kicked off by a
     # follow-up commit from the Contextual platform
-    if: ${{ !github.event.created }}
+    if: ${{ !github.event.created && vars.CONTEXTUAL_DEPLOYMENT_TYPE != 'WORKER' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check for a release
+        id: release
+        run: |
+          version=$(jq -r .version package.json)
+          if ls .changeset/*.md 2>/dev/null | grep -qv '/README.md$'; then exit 0; fi
+          if git rev-parse -q --verify "refs/tags/v$version" > /dev/null; then exit 0; fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v6
+        if: steps.release.outputs.version
+        with:
+          cache: 'yarn'
+          node-version-file: .nvmrc
+      - if: steps.release.outputs.version
+        run: yarn
+      - name: Create built artifact
+        if: steps.release.outputs.version
+        env:
+          PACKAGE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          yarn build
+          tar cvfz build-${PACKAGE_VERSION}.tar.gz ./dist ./package.json ./yarn.lock
+      - uses: actions/upload-artifact@v7
+        if: steps.release.outputs.version
+        with:
+          name: legacy-build
+          path: build-${{ steps.release.outputs.version }}.tar.gz
+
+  build:
+    needs: legacy-build
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() && !failure() && !github.event.created }}
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    outputs:
+      release: ${{ steps.release.outputs.tag }}
+      workers: ${{ steps.deployment.outputs.workers }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -24,28 +68,80 @@ jobs:
         with:
           cache: 'yarn'
           node-version-file: .nvmrc
-      - run: yarn
+      - run: yarn --ignore-scripts
+      - name: Check how the site deploys
+        id: deployment
+        env:
+          CONTEXTUAL_WORKER: ${{ vars.CONTEXTUAL_WORKER }}
+          WORKER_ONLY: ${{ vars.CONTEXTUAL_DEPLOYMENT_TYPE == 'WORKER' }}
+        run: |
+          version=$(jq -r .version package.json)
+          if ! ls .changeset/*.md 2>/dev/null | grep -qv '/README.md$' && ! git rev-parse -q --verify "refs/tags/v$version" > /dev/null; then
+            echo "releasing=true" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -n "$CONTEXTUAL_WORKER" ] || [ -n "$(git ls-files ':(glob)**/contextual-deploy.env')" ]; then
+            echo "workers=true" >> "$GITHUB_OUTPUT"
+          elif [ "$WORKER_ONLY" = true ]; then
+            echo "::error::CONTEXTUAL_DEPLOYMENT_TYPE is WORKER but no Workers are set; set CONTEXTUAL_WORKER, as a GitHub variable or in contextual-deploy.env"
+            exit 1
+          fi
+      - name: Push the Workers' images
+        if: steps.deployment.outputs.releasing == 'true' && steps.deployment.outputs.workers == 'true'
+        uses: ContextualIO/deploy-workers-action@v1
+        env:
+          CONTEXTUAL_SILO: ${{ vars.CONTEXTUAL_SILO }}
+          CONTEXTUAL_CONNECTIONS_URL: ${{ vars.CONTEXTUAL_CONNECTIONS_URL }}
+        with:
+          command: images
+          organization: ${{ vars.CONTEXTUAL_ORGANIZATION }}
+          worker: ${{ vars.CONTEXTUAL_WORKER }}
+          worker-size: ${{ vars.CONTEXTUAL_WORKER_SIZE }}
+          args: ${{ vars.CONTEXTUAL_DEPLOY_ARGS }}
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: yarn release
+          publish: ./bin/release.sh
       - name: Get package version
         if: steps.changesets.outputs.published == 'true'
         id: package-version
         run: |
           package_version=$(node -p "require('./package.json').version")
           echo "PACKAGE_VERSION=${package_version}" >> "$GITHUB_OUTPUT"
-      - name: Create built artifact
-        if: steps.changesets.outputs.published == 'true'
-        env:
-          PACKAGE_VERSION: ${{ steps.package-version.outputs.PACKAGE_VERSION }}
-        run: |
-          echo "version: $PACKAGE_VERSION"
-          tar cvfz build-${PACKAGE_VERSION}.tar.gz ./dist ./package.json ./yarn.lock
+      - uses: actions/download-artifact@v8
+        if: steps.changesets.outputs.published == 'true' && vars.CONTEXTUAL_DEPLOYMENT_TYPE != 'WORKER'
+        with:
+          name: legacy-build
       - name: Release
         uses: softprops/action-gh-release@v3
         if: steps.changesets.outputs.published == 'true'
         with:
-          files: build-${{ steps.package-version.outputs.PACKAGE_VERSION }}.tar.gz
+          files: ${{ vars.CONTEXTUAL_DEPLOYMENT_TYPE != 'WORKER' && format('build-{0}.tar.gz', steps.package-version.outputs.PACKAGE_VERSION) || '' }}
           tag_name: v${{ steps.package-version.outputs.PACKAGE_VERSION }}
+      - name: Find the release at this commit
+        id: release
+        if: ${{ !cancelled() }}
+        run: |
+          tag="v$(jq -r .version package.json)"
+          if git tag --points-at HEAD | grep -qx "$tag"; then echo "tag=$tag" >> "$GITHUB_OUTPUT"; fi
+
+  deploy:
+    needs: build
+    if: ${{ needs.build.result == 'success' && needs.build.outputs.release != '' && needs.build.outputs.workers == 'true' && vars.CONTEXTUAL_DEPLOY_ON_RELEASE == 'true' }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: contextual-deploy
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ContextualIO/deploy-workers-action@v1
+        env:
+          CONTEXTUAL_SILO: ${{ vars.CONTEXTUAL_SILO }}
+          CONTEXTUAL_CONNECTIONS_URL: ${{ vars.CONTEXTUAL_CONNECTIONS_URL }}
+        with:
+          organization: ${{ vars.CONTEXTUAL_ORGANIZATION }}
+          worker: ${{ vars.CONTEXTUAL_WORKER }}
+          worker-size: ${{ vars.CONTEXTUAL_WORKER_SIZE }}
+          args: ${{ vars.CONTEXTUAL_DEPLOY_ARGS }}
