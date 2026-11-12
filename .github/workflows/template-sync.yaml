@@ -10,6 +10,8 @@ permissions:
   contents: write
   pull-requests: write
 
+concurrency: template-sync
+
 jobs:
   template-sync:
     runs-on: ubuntu-latest
@@ -19,6 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
           token: ${{ secrets.TEMPLATE_SYNC_TOKEN }}
 
@@ -30,5 +33,6 @@ jobs:
       - name: Sync from astro-core template
         env:
           GH_TOKEN: ${{ secrets.TEMPLATE_SYNC_TOKEN }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           TEMPLATE_REMOTE: https://github.com/${{ github.repository_owner }}/astro-core.git
         run: ./bin/template-sync.sh
