@@ -1,5 +1,25 @@
 # @contextualio/astro-core
 
+## 0.2.0
+
+### Minor Changes
+
+- c1dfe6a: feat(deployment): build the site as a Worker with `DEPLOYMENT=WORKER`
+
+  - `DEPLOYMENT` chooses the build: `AGENT` (the default) for a site agent, unchanged, or `WORKER` for a standalone server behind the `site-worker` managed worker's gateway, which reads the visitor's auth config and site user from the gateway's headers.
+  - A root `Dockerfile` builds the Worker image. The site serves on the Pod's loopback and exits cleanly when the Pod stops it.
+
+### Patch Changes
+
+- 7715799: fix(template-sync): merge every package.json field and keep pending syncs intact
+
+  - `package.json` merges every field three ways except the site's `name`, `version` and `description`, so template changes to fields such as `resolutions` reach sites.
+  - A sync waiting to be merged is updated in place instead of closed and replaced, and is left alone once someone has pushed commits to it.
+  - A sync branch whose PR was never opened no longer stops later syncs.
+  - Every template changeset the merge brings in is dropped, including ones edited upstream.
+  - The sync's own changeset reads `chore(template): sync astro-core @ <commit>`.
+  - Sync runs never overlap, and a manually triggered run still syncs and targets the default branch.
+
 ## 0.1.0
 
 ### Minor Changes
