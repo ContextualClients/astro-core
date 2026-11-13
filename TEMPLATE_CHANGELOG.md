@@ -2,6 +2,26 @@
 
 **Before merging a template-sync PR, read the entry it adds here and follow any listed instructions.**
 
+## 2026-11-13 — Dependency upgrades and template sync improvements
+
+The template's dependencies are upgraded to their latest releases: `astro` 7.4.11, `@astrojs/node` 11.1.12, `zod` 4.6.7, `@astrojs/check` 0.9.12, `@stytch/vanilla-js` ^6.3.0 and `@types/node` 24.19.2, with `yarn.lock` refreshed to match. `typescript` stays on 6.0.3, because `@astrojs/check` doesn't support TypeScript 7 yet. `@changesets/cli` stays on 2.x, because 3.x requires Yarn 4.
+
+Template syncs also work better:
+
+- **`package.json` merges every field**, not just `dependencies`, `devDependencies`, `scripts`, `engines` and `type`, so template changes to fields such as `resolutions` now reach your site. Your `name`, `version` and `description` are still never touched.
+- **An open sync PR is updated in place** when the template moves again, instead of being closed and replaced. Once you have pushed commits to it, such as conflict resolutions, it is left alone, and the next sync after you merge it brings the rest.
+- **The template's own changesets never reach your site.** A changeset written for the template names the template's package, and would otherwise fail your site's next release.
+- **A sync's changeset is titled `chore(template): sync astro-core @ <commit>`**, matching the PR.
+- **Sync runs never overlap**, and a manually triggered run always syncs your default branch.
+
+If the sync PR conflicts in `package.json`, keep your own additions and take the template's new versions, then regenerate `yarn.lock` with `yarn install` rather than editing its markers.
+
+## 2026-11-09 — Build the site as a Worker
+
+A site can now also run as a Worker on the `managed-site-worker` managed worker. `DEPLOYMENT` chooses the build: `AGENT`, the default, is the site-agent build every site uses today and is unchanged; `WORKER` builds a standalone server that reads the visitor's sign-in from the Worker's gateway. This sync adds a root `Dockerfile` (with `docker/worker-shutdown.mjs`) that builds the Worker image, a `.dockerignore`, and `src/lib/gateway.ts`, and changes `astro.config.mjs` and `src/middleware.ts`.
+
+Nothing to do for a site that stays a site agent. If you have changed `astro.config.mjs` or `src/middleware.ts`, keep your changes and take the template's `DEPLOYMENT` additions when resolving the sync.
+
 ## 2026-10-17 — Template syncs now merge instead of overwriting
 
 Template syncs used to replace each shared file wholesale, so any edit you made to a template-owned file was lost unless you listed that file in `.templatesyncignore`. Syncs are now an ordinary three-way merge against the template: you receive the template's changes hunk by hunk, your own edits to the same files survive, and only genuinely overlapping edits stop to ask.
@@ -15,7 +35,7 @@ A new `.gitattributes` sits alongside it, describing how the sync merges particu
 
 **Sync PRs can now contain conflicts.** When the template and your site have edited the same lines, the PR arrives with conflict markers committed on its branch and a warning in the description. Resolve them on that branch before merging. A clean sync looks exactly as it always did.
 
-**Only one sync PR is open at a time.** If the template moves again before you merge one, that PR is closed and replaced by a new one carrying both rounds. Commits you pushed to the old branch — conflict resolutions included — are not carried over, so if you have started resolving one, finish and merge it before the template moves again.
+**Only one sync PR is open at a time.** If the template moves again before you merge one, the open PR is updated to carry both rounds. Once you have pushed commits to it — conflict resolutions included — it is left as it is instead, and the next sync after you merge it brings the rest.
 
 `yarn.lock` is the one conflict not worth reading. Resolve `package.json` first, then regenerate the lockfile with `yarn install` rather than editing the markers.
 

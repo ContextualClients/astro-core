@@ -1,5 +1,9 @@
-node_modules/
-dist/
 .astro/
-site-auth.local.json
+.claude/settings.local.json
 .DS_Store
+.env
+.env.local
+.env.*.local
+dist/
+node_modules/
+site-auth.local.json

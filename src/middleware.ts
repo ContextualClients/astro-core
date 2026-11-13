@@ -1,6 +1,8 @@
+import { DEPLOYMENT } from "astro:env/server"
 import { defineMiddleware } from "astro:middleware"
 import picomatch from "picomatch"
 import { config } from "./config"
+import { readGatewayLocals } from "./lib/gateway"
 
 const stripTrailingSlash = (p: string) => p.replace(/(.)\/+$/, "$1")
 const stripPrecedingSlashes = (p: string) => p.replace(/^[/\\\s]+/, "")
@@ -19,6 +21,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     context.locals.authConfig = devConfig?.authConfig
     if (devConfig?.disableAuth) return next()
     context.locals.siteUser = await loadDevSiteUser(devConfig, context)
+  } else if (DEPLOYMENT === "WORKER") {
+    Object.assign(context.locals, readGatewayLocals(context.request.headers))
   }
 
   // Sites with no auth-profile skip auth checks.
