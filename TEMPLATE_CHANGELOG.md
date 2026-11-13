@@ -18,7 +18,7 @@ If the sync PR conflicts in `package.json`, keep your own additions and take the
 
 ## 2026-11-09 — Build the site as a Worker
 
-A site can now also run as a Worker on the `site-worker` managed worker. `DEPLOYMENT` chooses the build: `AGENT`, the default, is the site-agent build every site uses today and is unchanged; `WORKER` builds a standalone server that reads the visitor's sign-in from the Worker's gateway. This sync adds a root `Dockerfile` (with `docker/worker-shutdown.mjs`) that builds the Worker image, a `.dockerignore`, and `src/lib/gateway.ts`, and changes `astro.config.mjs` and `src/middleware.ts`.
+A site can now also run as a Worker on the `managed-site-worker` managed worker. `DEPLOYMENT` chooses the build: `AGENT`, the default, is the site-agent build every site uses today and is unchanged; `WORKER` builds a standalone server that reads the visitor's sign-in from the Worker's gateway. This sync adds a root `Dockerfile` (with `docker/worker-shutdown.mjs`) that builds the Worker image, a `.dockerignore`, and `src/lib/gateway.ts`, and changes `astro.config.mjs` and `src/middleware.ts`.
 
 Nothing to do for a site that stays a site agent. If you have changed `astro.config.mjs` or `src/middleware.ts`, keep your changes and take the template's `DEPLOYMENT` additions when resolving the sync.
 
