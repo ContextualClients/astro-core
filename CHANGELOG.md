@@ -1,5 +1,11 @@
 # @contextualio/astro-core
 
+## 0.2.2
+
+### Patch Changes
+
+- 2e8f3fd: docs(template-changelog): name the Worker's managed worker `managed-site-worker`, its name since it was renamed from `site-worker`
+
 ## 0.2.1
 
 ### Patch Changes
