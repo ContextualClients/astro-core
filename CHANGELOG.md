@@ -1,5 +1,11 @@
 # @contextualio/astro-core
 
+## 0.2.3
+
+### Patch Changes
+
+- d136a8a: fix(template-sync): sync from the template's `stable` branch, its released line, instead of `main`
+
 ## 0.2.2
 
 ### Patch Changes
