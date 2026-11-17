@@ -26,7 +26,7 @@ if [ -f .templatesyncignore ]; then
 fi
 
 # Fetch the remote template and pin the commit this run will sync to.
-git fetch --no-tags "${TEMPLATE_REMOTE}" main
+git fetch --no-tags "${TEMPLATE_REMOTE}" stable
 template_head=$(git rev-parse FETCH_HEAD)
 template_head_short=$(git rev-parse --short FETCH_HEAD)
 

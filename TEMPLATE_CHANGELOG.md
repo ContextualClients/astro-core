@@ -2,6 +2,10 @@
 
 **Before merging a template-sync PR, read the entry it adds here and follow any listed instructions.**
 
+## 2026-11-17 — Syncs follow the template's stable branch
+
+Template syncs now merge the template's `stable` branch, which only receives released changes, instead of `main`, where the template is developed. Nothing to do: merge this sync, and later syncs come from `stable`.
+
 ## 2026-11-13 — Dependency upgrades and template sync improvements
 
 The template's dependencies are upgraded to their latest releases: `astro` 7.4.11, `@astrojs/node` 11.1.12, `zod` 4.6.7, `@astrojs/check` 0.9.12, `@stytch/vanilla-js` ^6.3.0 and `@types/node` 24.19.2, with `yarn.lock` refreshed to match. `typescript` stays on 6.0.3, because `@astrojs/check` doesn't support TypeScript 7 yet. `@changesets/cli` stays on 2.x, because 3.x requires Yarn 4.
