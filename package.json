@@ -1,6 +1,6 @@
 {
   "name": "@contextualio/astro-core",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Core codebase for Contextual's Astro-based front-end websites.",
   "type": "module",
   "engines": {
