@@ -1,0 +1,30 @@
+name: Deploy a release
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: The release to deploy, such as v1.2.0
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: contextual-deploy
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ inputs.release }}
+      - uses: ContextualIO/deploy-workers-action@v1
+        env:
+          CONTEXTUAL_SILO: ${{ vars.CONTEXTUAL_SILO }}
+          CONTEXTUAL_CONNECTIONS_URL: ${{ vars.CONTEXTUAL_CONNECTIONS_URL }}
+        with:
+          organization: ${{ vars.CONTEXTUAL_ORGANIZATION }}
+          worker: ${{ vars.CONTEXTUAL_WORKER }}
+          worker-size: ${{ vars.CONTEXTUAL_WORKER_SIZE }}
+          args: ${{ vars.CONTEXTUAL_DEPLOY_ARGS }}
